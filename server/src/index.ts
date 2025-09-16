@@ -61,16 +61,25 @@ fastify.get("/auth/callback", async (request:any, reply:any) => {
 		return reply.send({Error: "No code sent"});
 	if (cookieState !== state42)
 		return reply.code(400).send({Error: "Wrong state received"});
-	return reply.send({code}); 
+	return reply.send({code}) && reply.redirect(`http://localhost:3000/auth/token`); 
 });
 
-
-
-// const res = await fetch(`https://api.intra.42.fr/oauth/token`, {
-// 	method: "POST",
-// 	client_id: process.env.CLIENT_ID,
-// })
-
+fastify.get("auth/token", async (_request: any, reply: any) => {
+	const res = await fetch(`https://api.intra.42.fr/oauth/token` as string, {
+	method: "POST",
+	body: new URLSearchParams({
+		grant_type: "client_credentials",
+		client_id: process.env.CLIENT_ID!,
+		client_secret: process.env.CLIENT_SECRET!,
+		}),
+	})
+	if (res.ok) 
+		return reply.send({Error:"Token fetch failed"});
+	const data = await res.json();
+	if (!data)
+		return reply.send(data);
+	return reply.code(500).send({Error: "Data not received, tokne pb" });
+});
 
 
 await fastify.listen({ port: 3000, host: "0.0.0.0" });
