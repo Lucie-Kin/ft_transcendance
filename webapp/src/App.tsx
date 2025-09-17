@@ -6,7 +6,7 @@
 /*   By: mobonill <mobonill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 16:28:16 by mobonill          #+#    #+#             */
-/*   Updated: 2025/09/17 14:55:29 by mobonill         ###   ########.fr       */
+/*   Updated: 2025/09/17 17:45:17 by mobonill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ import Login from './components/login/Login'
 function App() {
 	return (
 		<Routes>
-            <Route path="/home" element={<Login/>}/>
+            <Route path="/login" element={<Login/>}/>
 			{/* <Route path="/home" element={Home}/> */}
 		</Routes>
 	)

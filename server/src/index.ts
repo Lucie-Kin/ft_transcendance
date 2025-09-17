@@ -11,7 +11,6 @@ import fastifyCookie from "@fastify/cookie";
 // import tournamentRoutes from "./routes/tournament.js";
 // import usersRoutes from "./routes/users.js";
 
-// declare var data;
 const fastify = Fastify({ logger: true });
 
 function generateState(): string {
@@ -29,6 +28,9 @@ fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 // await fastify.register(usersRoutes, { prefix: "/users" });
 // fastify.register(playersRoutes, { prefix: "/players" });
 // fastify.register(tournamentRoutes, {prefix: '/tournament'});
+
+let accessToken: string | null = null;
+let tokenExpiry: number | null = null;
 
 fastify.get("/", async () => {
 	return { message: "HELLO !!! /auth/42/login pour te connecter avec 42" };
@@ -61,28 +63,46 @@ fastify.get("/auth/callback", async (request:any, reply:any) => {
 		return reply.send({Error: "No code sent"});
 	if (cookieState !== state42)
 		return reply.code(400).send({Error: "Wrong state received"});
-	return reply.redirect(`http://localhost:3000/auth/token`); 
+
+	if (!accessToken || (tokenExpiry && Date.now() > tokenExpiry)) {
+		const res = await fetch(`https://api.intra.42.fr/oauth/token` , {
+		method: "POST",
+		body: new URLSearchParams({
+			grant_type: "authorization_code",
+			client_id: process.env.CLIENT_ID!,
+			client_secret: process.env.CLIENT_SECRET!,
+			code: code,
+			redirect_uri: process.env.REDIRECT_URI!
+			}),
+		})
+		const data = await res.json();
+		accessToken = data.access_token;
+		tokenExpiry = Date.now() + data.expires_in * 1000;
+		console.log("response : ", data)
+		if (!data)
+			return reply.code(500).send({Error: "Token not accessible" });
+	}
+	return reply.redirect(`/me`);
 });
 
-fastify.get("/auth/token", async (_request: any, reply: any) => {
-	const res = await fetch(`https://api.intra.42.fr/oauth/token` , {
-	method: "POST",
-	body: new URLSearchParams({
-		grant_type: "client_credentials",
-		client_id: process.env.CLIENT_ID!,
-		client_secret: process.env.CLIENT_SECRET!,
-		}),
-	})
-	const data = await res.json();
-	console.log("response : ", data)
-	if (!data)
-		return reply.code(500).send({Error: "Token not accessible" });
-
+fastify.get("/me", async (_request:any, reply:any) => {
+	if(!accessToken)
+		return reply.code(500).send({Error: "You are not connected" });
+	const res = await fetch("https://api.intra.42.fr/v2/me", {
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+	if (!res.ok) 
+		return reply.code(res.status).send({Error: "Profile fetch failed"});
+	const user = await res.json();
+	return {
+		id: user.id,
+		login: user.login,
+		email: user.email,
+		image: user.image?.link,
+	};
 });
-
-// function accessDataWithToken(data: any): any {
-
-// };
 
 
 await fastify.listen({ port: 3000, host: "0.0.0.0" });
