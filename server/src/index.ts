@@ -11,7 +11,7 @@ import fastifyCookie from "@fastify/cookie";
 // import tournamentRoutes from "./routes/tournament.js";
 // import usersRoutes from "./routes/users.js";
 
-
+// declare var data;
 const fastify = Fastify({ logger: true });
 
 function generateState(): string {
@@ -61,11 +61,11 @@ fastify.get("/auth/callback", async (request:any, reply:any) => {
 		return reply.send({Error: "No code sent"});
 	if (cookieState !== state42)
 		return reply.code(400).send({Error: "Wrong state received"});
-	return reply.send({code}) && reply.redirect(`http://localhost:3000/auth/token`); 
+	return reply.redirect(`http://localhost:3000/auth/token`); 
 });
 
-fastify.get("auth/token", async (_request: any, reply: any) => {
-	const res = await fetch(`https://api.intra.42.fr/oauth/token` as string, {
+fastify.get("/auth/token", async (_request: any, reply: any) => {
+	const res = await fetch(`https://api.intra.42.fr/oauth/token` , {
 	method: "POST",
 	body: new URLSearchParams({
 		grant_type: "client_credentials",
@@ -73,13 +73,16 @@ fastify.get("auth/token", async (_request: any, reply: any) => {
 		client_secret: process.env.CLIENT_SECRET!,
 		}),
 	})
-	if (res.ok) 
-		return reply.send({Error:"Token fetch failed"});
 	const data = await res.json();
+	console.log("response : ", data)
 	if (!data)
-		return reply.send(data);
-	return reply.code(500).send({Error: "Data not received, tokne pb" });
+		return reply.code(500).send({Error: "Token not accessible" });
+
 });
+
+// function accessDataWithToken(data: any): any {
+
+// };
 
 
 await fastify.listen({ port: 3000, host: "0.0.0.0" });

@@ -22,6 +22,7 @@ chore(<NOM FEATURE>): <commentaire>
 
 
 
+
 Exemple:
 
 J'ai travaille sur l'authentification :

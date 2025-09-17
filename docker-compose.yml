@@ -28,3 +28,11 @@ services:
       - ./webapp:/webapp
     environment:
       VITE_BACKEND_ULR: http://localhost:3000
+
+  adminer:
+    image: adminer:4.8.1-standalone
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./server/prisma:/var/sqlite

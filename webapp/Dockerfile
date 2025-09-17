@@ -3,7 +3,7 @@ FROM node:20-bullseye-slim
 WORKDIR /webapp
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 
