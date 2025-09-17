@@ -4,8 +4,8 @@ import crypto from "crypto";
 // import fastifyCookie from "fastify-cookie";
 import fastifyCookie from "@fastify/cookie";
 // import oauth42 from "./plugins/oauth.js";
-// import fastifyCookie from "@fastify/cookie";
 // import prismaPlugin from "./plugins/prisma.js";
+import fastifyJwt from "@fastify/jwt";
 // import oauth42 from "./plugins/oauth.js";
 // import playersRoutes from "./routes/players.js";
 // import tournamentRoutes from "./routes/tournament.js";
@@ -20,10 +20,7 @@ function generateState(): string {
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 
 // await fastify.register(prismaPlugin);
-// await fastify.register(oauth42);
-// fastify.after(() => {
-//	console.log("✅ OAuth plugin chargé:", fastify.fortytwoOAuth);
-// });
+fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
 
 // await fastify.register(usersRoutes, { prefix: "/users" });
 // fastify.register(playersRoutes, { prefix: "/players" });
@@ -53,26 +50,25 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	return reply.redirect(url);
 });
 
-
-fastify.get("/auth/callback", async (request:any, reply:any) => {
+fastify.get("/auth/callback", async (request: any, reply: any) => {
 	const code = request.query.code;
 	const state42 = request.query.state;
 	const cookieState = request.cookies.oauth_cookie;
 
 	if (!code || !state42)
-		return reply.send({Error: "No code sent"});
+		return reply.send({ Error: "No code sent" });
 	if (cookieState !== state42)
-		return reply.code(400).send({Error: "Wrong state received"});
+		return reply.code(400).send({ Error: "Wrong state received" });
 
 	if (!accessToken || (tokenExpiry && Date.now() > tokenExpiry)) {
-		const res = await fetch(`https://api.intra.42.fr/oauth/token` , {
-		method: "POST",
-		body: new URLSearchParams({
-			grant_type: "authorization_code",
-			client_id: process.env.CLIENT_ID!,
-			client_secret: process.env.CLIENT_SECRET!,
-			code: code,
-			redirect_uri: process.env.REDIRECT_URI!
+		const res = await fetch(`https://api.intra.42.fr/oauth/token`, {
+			method: "POST",
+			body: new URLSearchParams({
+				grant_type: "authorization_code",
+				client_id: process.env.CLIENT_ID!,
+				client_secret: process.env.CLIENT_SECRET!,
+				code: code,
+				redirect_uri: process.env.REDIRECT_URI!
 			}),
 		})
 		const data = await res.json();
@@ -80,29 +76,39 @@ fastify.get("/auth/callback", async (request:any, reply:any) => {
 		tokenExpiry = Date.now() + data.expires_in * 1000;
 		console.log("response : ", data)
 		if (!data)
-			return reply.code(500).send({Error: "Token not accessible" });
+			return reply.code(500).send({ Error: "Token not accessible" });
 	}
 	return reply.redirect(`/me`);
 });
 
-fastify.get("/me", async (_request:any, reply:any) => {
-	if(!accessToken)
-		return reply.code(500).send({Error: "You are not connected" });
+fastify.get("/me", async (_request, reply) => {
+	if (!accessToken) {
+		return reply.code(401).send({ error: "not_authenticated" });
+	}
 	const res = await fetch("https://api.intra.42.fr/v2/me", {
-		headers: {
-			Authorization: `Bearer ${accessToken}`,
-		},
+		headers: { Authorization: `Bearer ${accessToken}` },
 	});
-	if (!res.ok) 
-		return reply.code(res.status).send({Error: "Profile fetch failed"});
+	if (!res.ok)
+		return reply.code(res.status).send({Error: "Fetch failed line 93" });
 	const user = await res.json();
-	return {
+	const appToken = fastify.jwt.sign({
 		id: user.id,
 		login: user.login,
 		email: user.email,
 		image: user.image?.link,
-	};
+	});
+	reply.setCookie("appToken", appToken, {
+		httpOnly: true,
+		sameSite: "lax",
+	});
+	return reply.send({
+		id: user.id,
+		login: user.login,
+		email: user.email,
+		image: user.image?.link,
+	});
 });
+
 
 
 await fastify.listen({ port: 3000, host: "0.0.0.0" });
