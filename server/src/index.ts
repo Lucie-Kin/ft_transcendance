@@ -4,7 +4,7 @@ import crypto from "crypto";
 // import fastifyCookie from "fastify-cookie";
 import fastifyCookie from "@fastify/cookie";
 // import oauth42 from "./plugins/oauth.js";
-// import prismaPlugin from "./plugins/prisma.js";
+import prismaPlugin from "./plugins/prisma.js";
 import fastifyJwt from "@fastify/jwt";
 // import oauth42 from "./plugins/oauth.js";
 // import playersRoutes from "./routes/players.js";
@@ -19,7 +19,7 @@ function generateState(): string {
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 
-// await fastify.register(prismaPlugin);
+await fastify.register(prismaPlugin);
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
 
 // await fastify.register(usersRoutes, { prefix: "/users" });
