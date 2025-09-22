@@ -18,7 +18,7 @@ function generateState(): string {
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 
-await fastify.register(prismaPlugin);
+// await fastify.register(prismaPlugin);
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
 
 // await fastify.register(usersRoutes, { prefix: "/users" });
