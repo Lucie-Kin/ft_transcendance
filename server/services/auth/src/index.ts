@@ -1,14 +1,9 @@
 "dotenv/config";
 import Fastify from "fastify";
 import crypto from "crypto";
-// import fastifyCookie from "fastify-cookie";
 import fastifyCookie from "@fastify/cookie";
-// import oauth42 from "./plugins/oauth.js";
 import fastifyJwt from "@fastify/jwt";
-// import oauth42 from "./plugins/oauth.js";
-// import playersRoutes from "./routes/players.js";
-// import tournamentRoutes from "./routes/tournament.js";
-// import usersRoutes from "./routes/users.js";
+
 
 const fastify = Fastify({ logger: true });
 
@@ -18,12 +13,8 @@ function generateState(): string {
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 
-// await fastify.register(prismaPlugin);
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
 
-// await fastify.register(usersRoutes, { prefix: "/users" });
-// fastify.register(playersRoutes, { prefix: "/players" });
-// fastify.register(tournamentRoutes, {prefix: '/tournament'});
 
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
@@ -39,11 +30,11 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	reply.setCookie("oauth_cookie", state, {
 		path: "/",
 		httpOnly: true,
-		sameSite: "lax",
+		sameSite: "none", // si 'lax', cela ne fonctionne pas avec Firefox
 		secure: false,
 	});
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
-		`&redirect_uri=${encodeURIComponent("http://localhost:3000/auth/callback")}` +
+		`&redirect_uri=${encodeURIComponent("http://localhost:3001/auth/callback")}` +
 		`&response_type=code` + `&state=${state}`;
 
 	return reply.redirect(url);
@@ -58,7 +49,6 @@ fastify.get("/auth/callback", async (request: any, reply: any) => {
 		return reply.send({ Error: "No code sent" });
 	if (cookieState !== state42)
 		return reply.code(400).send({ Error: "Wrong state received" });
-
 	if (!accessToken || (tokenExpiry && Date.now() > tokenExpiry)) {
 		const res = await fetch(`https://api.intra.42.fr/oauth/token`, {
 			method: "POST",
@@ -110,4 +100,4 @@ fastify.get("/me", async (_request, reply) => {
 
 
 
-await fastify.listen({ port: 3000, host: "0.0.0.0" });
+await fastify.listen({ port: 3001, host: "0.0.0.0" });

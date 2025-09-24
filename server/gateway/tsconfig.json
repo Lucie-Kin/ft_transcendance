@@ -7,7 +7,7 @@
     "esModuleInterop": true,
     "strict": false,
     "skipLibCheck": true,
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "forceConsistentCasingInFileNames": true
@@ -15,6 +15,6 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src"],
+  "include": ["src", "index.ts"],
   "exclude": ["node_modules", "dist"]
 }

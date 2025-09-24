@@ -43,7 +43,7 @@ services:
     volumes:
       - ./webapp:/webapp
     environment:
-      VITE_BACKEND_ULR: http://localhost:3000
+      VITE_BACKEND_ULR: http://localhost:3001
 
   adminer:
     image: adminer:4.8.1-standalone
