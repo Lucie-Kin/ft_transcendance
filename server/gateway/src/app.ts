@@ -1,6 +1,5 @@
 import fastify from 'fastify'
-import path from "path";
-import fastifyFavicon from 'fastify-favicon';
+import faviconPlugin from "./plugins/favicon.js";
 
 
 /* this function start the server */
@@ -12,10 +11,8 @@ export async function server (options = {logger: true}) {
 	});
 	
 /* Add a favicon icone */
-	app.register(fastifyFavicon, {
-		path: path.join(process.cwd(), "public"),
-		name: 'fastifyFavicon.ico'
-	});
+  await app.register(faviconPlugin);
+
 /* ----*/
 
 	return app;

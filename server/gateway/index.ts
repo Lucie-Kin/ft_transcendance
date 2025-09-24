@@ -11,6 +11,7 @@ import { server } from'./src/app.js'
 dotenv.config();
 
 
+
 const start = async() => {
 	let app: FastifyInstance | null = null
 	try {
