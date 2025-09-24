@@ -23,16 +23,20 @@ fastify.get("/", async () => {
 	return { message: "HELLO !!! /auth/42/login pour te connecter avec 42" };
 });
 
+const pendingStates = new Map<string, number>(); 
+
 
 fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	const state = generateState();
 	console.log("LOGIN - Generated state:", state);
-	reply.setCookie("oauth_cookie", state, {
-		path: "/",
-		httpOnly: true,
-		sameSite: "none", // si 'lax', cela ne fonctionne pas avec Firefox
-		secure: false,
-	});
+	// reply.setCookie("oauth_cookie", state, {
+	// 	path: "/",
+	// 	httpOnly: true,
+	// 	sameSite: "none", // 'lax' ne fonctionne pas avec Firefox
+	// 	secure: true,
+	// });
+	pendingStates.set(state, Date.now() + 5 * 60 * 1000);
+
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
 		`&redirect_uri=${encodeURIComponent("http://localhost:3001/auth/callback")}` +
 		`&response_type=code` + `&state=${state}`;
@@ -43,12 +47,19 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 fastify.get("/auth/callback", async (request: any, reply: any) => {
 	const code = request.query.code;
 	const state42 = request.query.state;
-	const cookieState = request.cookies.oauth_cookie;
+	// const cookieState = request.cookies.oauth_cookie;
 
 	if (!code || !state42)
 		return reply.send({ Error: "No code sent" });
-	if (cookieState !== state42)
-		return reply.code(400).send({ Error: "Wrong state received" });
+	const expiry = pendingStates.get(state42);
+	if (!expiry || Date.now() > expiry) {
+		return reply.code(400).send({ error: "Invalid or expired state" });
+	}
+	pendingStates.delete(state42);
+
+	// if (cookieState !== state42) {
+	// 	return reply.code(400).send({ Error: "Wrong state received" });
+	// }
 	if (!accessToken || (tokenExpiry && Date.now() > tokenExpiry)) {
 		const res = await fetch(`https://api.intra.42.fr/oauth/token`, {
 			method: "POST",
@@ -88,7 +99,8 @@ fastify.get("/me", async (_request, reply) => {
 	});
 	reply.setCookie("appToken", appToken, {
 		httpOnly: true,
-		sameSite: "lax",
+		sameSite: "none",
+		secure: true
 	});
 	return reply.send({
 		id: user.id,
