@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Button42.tsx                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mobonill <mobonill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 16:28:09 by mobonill          #+#    #+#             */
-/*   Updated: 2025/09/17 14:47:17 by mobonill         ###   ########.fr       */
+/*   Updated: 2025/10/03 18:15:28 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import '../../../style/login/button42.css'
+import logo42 from '../../../assets/logo42.jpg'
 
 export default function Button42() {
 	const handleClick = () => {
@@ -19,7 +20,8 @@ export default function Button42() {
 
 	return (
 		<button className="button42" onClick={handleClick}>
-			Login with 42!
+			<img src={logo42} alt="logo" className='logo42' />
+			Continuez avec 42
 		</button>
 	)
 }

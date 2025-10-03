@@ -1,19 +1,28 @@
 import "../../style/home/homepage.css";
 import { Link } from "react-router-dom";
-import Login from '../login/Login'
 import { IoMailOutline } from "react-icons/io5";
 import { IoLockClosedOutline } from "react-icons/io5";
+import { IoPersonOutline } from "react-icons/io5";
 
 
-export default function HomePage() {
+export default function inscriptionPage() {
   return (
     <div> <h1>Transcendance</h1>
     <div className="container">
       <div className="wrapper">
         <section className="login">
-          <h2>Connexion</h2>
-            <Login/> <br></br>
+          <h2>Inscription</h2>
           <form>
+            <div className="inputbox">
+                <IoPersonOutline size={20} />
+              <input type="text" id="text" placeholder=" " required/>
+              <label htmlFor="text"> Nom</label>
+            </div>
+            <div className="inputbox">
+                <IoPersonOutline size={20} />
+              <input type="text" id="text" placeholder=" " required/>
+              <label htmlFor="text"> Prénom</label>
+            </div>
             <div className="inputbox">
                 <IoMailOutline size={20} />
               <input type="email" id="email" placeholder=" " required/>
@@ -24,16 +33,10 @@ export default function HomePage() {
               <input type="password" id="password" placeholder=" " required  />
               <label htmlFor="password"> Mot de passe</label>
             </div>
-            <div className="forgot">
-              <br></br>
-              <a href="">Mot de passe oublié ?</a>
-            </div>
-
-            <button type="submit">Connexion</button>
-            <div className="register">
+            <div className="login">
             <br></br>
-              <span>Pas de compte ?</span>
-               <Link to="/register" className="switch-to-register">
+              <span>Pas de compte ? </span>
+               <Link to="/" className="switch-to-login">
                 S'inscrire
                </Link>
             </div>
