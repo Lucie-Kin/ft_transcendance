@@ -19,7 +19,7 @@ fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
 
-fastify.get("/", async () => {
+fastify.get("/auth", async () => {
 	return { message: "HELLO !!! /auth/42/login pour te connecter avec 42" };
 });
 
@@ -38,7 +38,7 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	pendingStates.set(state, Date.now() + 5 * 60 * 1000);
 
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
-		`&redirect_uri=${encodeURIComponent("http://localhost:3001/auth/callback")}` +
+		`&redirect_uri=${encodeURIComponent("https://localhost/auth/callback")}` +
 		`&response_type=code` + `&state=${state}`;
 
 	return reply.redirect(url);
@@ -78,10 +78,10 @@ fastify.get("/auth/callback", async (request: any, reply: any) => {
 		if (!data)
 			return reply.code(500).send({ Error: "Token not accessible" });
 	}
-	return reply.redirect(`/me`);
+	return reply.redirect(`/auth/me`);
 });
 
-fastify.get("/me", async (_request, reply) => {
+fastify.get("/auth/me", async (_request, reply) => {
 	if (!accessToken) {
 		return reply.code(401).send({ error: "not_authenticated" });
 	}

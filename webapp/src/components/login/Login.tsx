@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Login.tsx                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mobonill <mobonill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 16:38:43 by mobonill          #+#    #+#             */
-/*   Updated: 2025/09/22 18:14:48 by mobonill         ###   ########.fr       */
+/*   Updated: 2025/10/17 16:26:23 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ export default function Login() {
 
 	return (
 		<div className="login">
-			<a href='http://localhost:3001/auth/42/login'>
+			<a href='/auth/42/login'>
 			<Button42/>
 			</a>
 		</div>
