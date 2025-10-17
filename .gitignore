@@ -1,0 +1,10 @@
+# Binaires inutiles pour le repo
+prometheus-*.linux-*/
+grafana-*.linux-*/
+*.tar.gz
+*.zip
+# Binaires inutiles (on utilise Docker)
+prometheus-*.linux-*/
+grafana-*.linux-*/
+*.tar.gz
+*.zip
