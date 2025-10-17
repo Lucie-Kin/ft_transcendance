@@ -32,7 +32,7 @@ export default function HomePage() {
             <button type="submit">Connexion</button>
             <div className="register">
             <br></br>
-              <span>Pas de compte ?</span>
+              <span>Pas de compte ? </span>
                <Link to="/register" className="switch-to-register">
                 S'inscrire
                </Link>

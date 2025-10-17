@@ -35,9 +35,9 @@ export default function inscriptionPage() {
             </div>
             <div className="login">
             <br></br>
-              <span>Pas de compte ? </span>
+              <span>Déjà un compte ? </span>
                <Link to="/" className="switch-to-login">
-                S'inscrire
+                Se connecter
                </Link>
             </div>
           </form>
