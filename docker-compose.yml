@@ -22,31 +22,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080" 
+      - "8080:8080" #dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./reverse-proxy/certs:/certs:ro
       - ./reverse-proxy/dynamic:/dynamic:ro
     networks:
       - transcendance_net
-
-  # gateway:
-  #   container_name: gateway
-  #   build:
-  #     context: ./server/gateway
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./server/gateway:/app
-  #   env_file:
-  #     - ./.env
-  #   environment:
-  #     CLIENT_ID: ${CLIENT_ID}
-  #     CLIENT_SECRET: ${CLIENT_SECRET}
-  #     REDIRECT_URI: ${REDIRECT_URI}
-  #     CHOKIDAR_USEPOLLING: true
-  #   depends_on:
-  #     - auth
 
 
   auth:
@@ -74,6 +56,7 @@ services:
     networks: 
       - transcendance_net
 
+
   webapp:
     container_name: webapp
     build:
@@ -92,31 +75,54 @@ services:
     networks:
     - transcendance_net
 
-  # adminer:
-  #   image: adminer:4.8.1-standalone
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - ./server/prisma:/var/sqlite
 
-  # server:
-  #   container_name: server
-  #   build:
-  #     context: ./server
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - transcendance_net
+
+  # grafana:
+  #   image: grafana/grafana-oss:latest
+  #   container_name: grafana
   #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./server:/server
-  #     - ./server/prisma:/server/prisma
-  #   env_file:
-  #     - ./.env
+  #     - "${GRAFANA_PORT:-3000}:3000"
   #   environment:
-  #     DATABASE_URL: "file:/server/prisma/dev.db"
-  #     CLIENT_ID: ${CLIENT_ID}
-  #     CLIENT_SECRET: ${CLIENT_SECRET}
-  #     REDIRECT_URI: ${REDIRECT_URI}
-  #     CHOKIDAR_USEPOLLING: true
+  #     - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #     - ./grafana/provisioning:/etc/grafana/provisioning
+  #     - ./grafana/dashboards:/var/lib/grafana/dashboards
+  #   depends_on:
+  #     - prometheus
+  #   networks:
+  #     - transcendance_net
+
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    expose:
+      - "9100"
+    command:
+      - "--path.rootfs=/host"
+      - "--web.listen-address=:9100"
+    volumes:
+      - /:/host:ro,rslave
+    networks: 
+      - transcendance_net
+
+
+volumes:
+  prometheus-data:
+  # grafana-data:
+
 
 networks:
   transcendance_net:

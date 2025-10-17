@@ -7,11 +7,12 @@ scrape_configs:
       - targets: ["localhost:9090"]
   - job_name: node_exporter
     static_configs:
-      - targets: ["localhost:9100"]
-  - job_name: "backend"
+      - targets: ["node-exporter:9100"]
+  - job_name: 'traefik'
+    scrape_interval: 5s
     static_configs:
-      # CAS A (backend conteneurisé dans le même réseau Compose)
-      # - targets: ["backend:8080"]
-
-      # CAS B (backend lancé sur l'hôte, hors Docker)
-      - targets: ["backend:8080"]
+      - targets: ['traefik:8080']
+  - job_name: "auth"
+    metrics_path: /auth/metrics
+    static_configs:
+      - targets: ["auth:3001"]
