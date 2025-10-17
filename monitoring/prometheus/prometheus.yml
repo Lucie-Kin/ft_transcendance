@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+  - job_name: node_exporter
+    static_configs:
+      - targets: ["localhost:9100"]
+  - job_name: "backend"
+    static_configs:
+      # CAS A (backend conteneurisé dans le même réseau Compose)
+      # - targets: ["backend:8080"]
+
+      # CAS B (backend lancé sur l'hôte, hors Docker)
+      - targets: ["backend:8080"]
