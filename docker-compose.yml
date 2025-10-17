@@ -13,7 +13,7 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       # provider fichier pour le TLS local
-      - "--providers.file.directory=/dynamic"
+      - "--providers.file.directory=/dynamics"
       - "--providers.file.watch=true"
       # dashboard local (HTTP) + metriques
       - "--api.insecure=true"
@@ -87,22 +87,22 @@ services:
     networks:
       - transcendance_net
 
-  # grafana:
-  #   image: grafana/grafana-oss:latest
-  #   container_name: grafana
-  #   ports:
-  #     - "${GRAFANA_PORT:-3000}:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-  #   volumes:
-  #     - grafana-data:/var/lib/grafana
-  #     - ./grafana/provisioning:/etc/grafana/provisioning
-  #     - ./grafana/dashboards:/var/lib/grafana/dashboards
-  #   depends_on:
-  #     - prometheus
-  #   networks:
-  #     - transcendance_net
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - transcendance_net
 
 
   node-exporter:
@@ -121,7 +121,7 @@ services:
 
 volumes:
   prometheus-data:
-  # grafana-data:
+  grafana-data:
 
 
 networks:

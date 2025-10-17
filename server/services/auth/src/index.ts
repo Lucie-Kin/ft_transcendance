@@ -5,6 +5,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
 
 
+
 const fastify = Fastify({ logger: true });
 
 function generateState(): string {
