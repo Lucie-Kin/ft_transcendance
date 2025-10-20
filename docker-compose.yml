@@ -20,13 +20,13 @@ services:
       - "--metrics.prometheus=true"
       - "--metrics.prometheus.addrouterslabels=true"
     ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080" #dashboard
+      - "8082:80" #http
+      - "443:443" #https
+      - "8081:8080" #dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./reverse-proxy/certs:/certs:ro
-      - ./reverse-proxy/dynamic:/dynamic:ro
+      - ./reverse-proxy/dynamics:/dynamics:ro
     networks:
       - transcendance_net
 
@@ -38,12 +38,18 @@ services:
     expose:
       - "3001"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=Host(`localhost`) && PathPrefix(`/auth`)"
-      - "traefik.http.routers.auth.entrypoints=websecure"
-      - "traefik.http.routers.auth.tls=true"
-      - "traefik.http.routers.auth.priority=20"
-      - "traefik.http.services.auth.loadbalancer.server.port=3001"
+     - "traefik.http.routers.auth.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/auth`)"
+     - "traefik.http.routers.auth.entrypoints=websecure"
+     - "traefik.http.routers.auth.tls=true"
+     - "traefik.http.services.auth.loadbalancer.server.port=3001"
+     - "traefik.http.routers.auth.priority=10"
+     - "traefik.http.routers.auth-metrics.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/metrics`)"
+     - "traefik.http.routers.auth-metrics.entrypoints=websecure"
+     - "traefik.http.routers.auth-metrics.tls=true"
+     - "traefik.http.routers.auth-metrics.priority=30"
+     - "traefik.http.services.auth-metrics.loadbalancer.server.port=3001"
+     - "traefik.http.routers.auth-metrics.middlewares=metrics-auth"
+     - "traefik.http.middlewares.metrics-auth.basicauth.users=prometheus:$$apr1$$qwerty$$mU8gq/R4L.0ZVmZJKzzWb0"
     volumes:
       - ./server/services/auth:/app
     env_file:
@@ -67,7 +73,7 @@ services:
       - ./webapp:/webapp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.front.rule=Host(`localhost`)"
+      - "traefik.http.routers.front.rule=Host(`localhost`) && PathPrefix(`/`)"
       - "traefik.http.routers.front.entrypoints=websecure"
       - "traefik.http.routers.front.tls=true"
       - "traefik.http.routers.front.priority=1"

@@ -3,7 +3,7 @@ import Fastify from "fastify";
 import crypto from "crypto";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
-
+import fastifyMetrics from "fastify-metrics";
 
 
 const fastify = Fastify({ logger: true });
@@ -13,9 +13,8 @@ function generateState(): string {
 }
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
-
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
-
+(fastify as any).register(fastifyMetrics, { endpoint: "/metrics"});
 
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
@@ -111,6 +110,15 @@ fastify.get("/auth/me", async (_request, reply) => {
 	});
 });
 
+// fastify.get("/metrics", async (_req, reply) => {
+//   const metrics = `
+// 		# HELP http_requests_total Nombre total de requêtes HTTP
+// 		# TYPE http_requests_total counter
+// 		http_requests_total{method="GET",status="200"} 42
+// 		`;
+//   reply.header("Content-Type", "text/plain");
+//   return metrics;
+// });
 
 
 await fastify.listen({ port: 3001, host: "0.0.0.0" });
