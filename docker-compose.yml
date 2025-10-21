@@ -38,18 +38,12 @@ services:
     expose:
       - "3001"
     labels:
-     - "traefik.http.routers.auth.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/auth`)"
-     - "traefik.http.routers.auth.entrypoints=websecure"
-     - "traefik.http.routers.auth.tls=true"
-     - "traefik.http.services.auth.loadbalancer.server.port=3001"
-     - "traefik.http.routers.auth.priority=10"
-     - "traefik.http.routers.auth-metrics.rule=HostRegexp(`{host:.+}`) && PathPrefix(`/metrics`)"
-     - "traefik.http.routers.auth-metrics.entrypoints=websecure"
-     - "traefik.http.routers.auth-metrics.tls=true"
-     - "traefik.http.routers.auth-metrics.priority=30"
-     - "traefik.http.services.auth-metrics.loadbalancer.server.port=3001"
-     - "traefik.http.routers.auth-metrics.middlewares=metrics-auth"
-     - "traefik.http.middlewares.metrics-auth.basicauth.users=prometheus:$$apr1$$qwerty$$mU8gq/R4L.0ZVmZJKzzWb0"
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth`)"
+      - "traefik.http.routers.auth.entrypoints=websecure"
+      - "traefik.http.routers.auth.tls=true"
+      - "traefik.http.services.auth.loadbalancer.server.port=3001"
+      - "traefik.http.middlewares.metrics-auth.basicauth.users=prometheus:$$apr1$$qwerty$$mU8gq/R4L.0ZVmZJKzzWb0"
     volumes:
       - ./server/services/auth:/app
     env_file:

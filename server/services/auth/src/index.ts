@@ -14,7 +14,7 @@ function generateState(): string {
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
-(fastify as any).register(fastifyMetrics, { endpoint: "/metrics"});
+(fastify as any).register(fastifyMetrics, { endpoint: "/auth/metrics"});
 
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
@@ -38,7 +38,7 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	pendingStates.set(state, Date.now() + 5 * 60 * 1000);
 
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
-		`&redirect_uri=${encodeURIComponent("https://localhost/auth/callback")}` +
+		`&redirect_uri=${encodeURIComponent("https://localhost:443/auth/callback")}` +
 		`&response_type=code` + `&state=${state}`;
 
 	return reply.redirect(url);
