@@ -19,7 +19,7 @@ export class GameEngine {
 			player.y = Math.min(this.field.height - player.height, player.y + player.speed);
 	}
 
-	resetBall() {
+	private resetBall() {
 		const angle = (Math.random() * Math.PI / 2) - (Math.PI / 4); // angle aléatoire entre -45° et +45° (en radians)
 		const speed = 5;
 		const direction = ((this.scoreP1 + this.scoreP2) % 2 === 0) ? 1 : -1; //envoie a gauche ou a droite
@@ -30,7 +30,7 @@ export class GameEngine {
 		this.ball.speedY = Math.sin(angle) * speed;
 	}
 
-	moveBall() {
+	private moveBall() {
 		this.ball.x += this.ball.speedX;
 		this.ball.y += this.ball.speedY;
 		this.checkScore();
@@ -38,7 +38,7 @@ export class GameEngine {
 			this.ball.speedY *= -1;
 	}
 
-	checkScore() {
+	private checkScore() {
 		if (this.ball.x + this.ball.radius >= this.field.width) {
 			this.scoreP1++;
 			this.resetBall();
@@ -49,16 +49,33 @@ export class GameEngine {
 		}
 	}
 
-	checkCollisions() {
-		if (this.ball.x - this.ball.radius <= this.player1.x + this.player1.width && //si bord gauche de la balle atteint le bord droit du paddle
-			this.ball.y >= this.player1.y && this.ball.y <= this.player1.y + this.player1.height && //si le centre de la balle est entre le haut et le bas du paddle
-			this.ball.speedX < 0) { //la balle va vers la gauche
-			this.ball.speedX = Math.abs(this.ball.speedX); //vitesse positive -> vers la droite
+	private calculateBounce(player: Player, direction: 1 | -1) {
+		const relativeY = (this.ball.y - (player.y + player.height / 2)); //Ou est-ce que la balle touche la raquette
+		const normalizedY = relativeY / (player.height / 2); //valeur entre -1 et 1 si haut, milieu ou bas de la raquette
+		const maxAngle = Math.PI / 3; //angle max de renvoi
+		const angle = normalizedY * maxAngle; //angle calcule
+		const speed = Math.sqrt(this.ball.speedX**2 + this.ball.speedY**2) * 1.05;
+
+		this.ball.speedX = direction * Math.abs(speed * Math.cos(angle));
+		this.ball.speedY = speed * Math.sin(angle);
+	}
+
+	private checkCollisions() {
+		const ballLeft = this.ball.x - this.ball.radius;
+		const ballRight = this.ball.x + this.ball.radius;
+		const ballTop = this.ball.y - this.ball.radius;
+		const ballBottom = this.ball.y + this.ball.radius;
+		const p1Right = this.player1.x + this.player1.width;
+		const p1Bottom = this.player1.y + this.player1.height;
+		const p2Bottom = this.player2.y + this.player2.height;
+
+		if (ballLeft <= p1Right && ballBottom >= this.player1.y && ballTop <= p1Bottom && this.ball.speedX < 0) {
+			this.calculateBounce(this.player1, 1);
+			this.ball.x = p1Right + this.ball.radius; //a corriger
 		}
-		if (this.ball.x + this.ball.radius >= this.player2.x && //si bord droit de la balle atteint le bord gauche du paddle
-			this.ball.y >= this.player2.y && this.ball.y <= this.player2.y + this.player2.height && //si le centre de la balle est entre le haut et le bas du paddle
-			this.ball.speedX > 0) { //la balle va vers la droite
-			this.ball.speedX = -Math.abs(this.ball.speedX); //vitesse negative -> vers la gauche
+		if (ballRight >= this.player2.x && ballBottom >= this.player2.y && ballTop <= p2Bottom && this.ball.speedX > 0) {
+			this.calculateBounce(this.player2, -1);
+			this.ball.x = this.player2.x - this.ball.radius; //a corriger
 		}
 	}
 

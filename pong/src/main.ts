@@ -54,18 +54,9 @@ function gameLoop() {
 	engine.update();
 	render();
 	updateScore();
-	if (engine.scoreP1 === 5 || engine.scoreP2 === 5) return ;
+	if (engine.scoreP1 === 5 || engine.scoreP2 === 5)
+		return ;
 	requestAnimationFrame(gameLoop);
 }
 
-// démarre la boucle
 gameLoop();
-
-
-//function gameLoop() {
-//	handleInput();
-//	engine.update();
-//	//render
-//}
-
-//gameLoop();
