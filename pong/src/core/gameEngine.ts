@@ -20,12 +20,14 @@ export class GameEngine {
 	}
 
 	resetBall() {
+		const angle = (Math.random() * Math.PI / 2) - (Math.PI / 4); // angle aléatoire entre -45° et +45° (en radians)
+		const speed = 5;
+		const direction = ((this.scoreP1 + this.scoreP2) % 2 === 0) ? 1 : -1; //envoie a gauche ou a droite
+
 		this.ball.x = this.field.width / 2;
 		this.ball.y = this.field.height / 2;
-		if ((this.scoreP1 + this.scoreP2) % 2 === 0)
-			this.ball.speedX = Math.abs(this.ball.speedX);
-		else
-			this.ball.speedX = -Math.abs(this.ball.speedX);
+		this.ball.speedX = Math.cos(angle) * speed * direction;
+		this.ball.speedY = Math.sin(angle) * speed;
 	}
 
 	moveBall() {

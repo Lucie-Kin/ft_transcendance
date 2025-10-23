@@ -49,10 +49,11 @@ ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
 ctx.fill();
 }
 
-function gameLoop(): void {
+function gameLoop() {
 	handleInput();
 	engine.update();
 	render();
+	updateScore();
 	if (engine.scoreP1 === 5 || engine.scoreP2 === 5) return ;
 	requestAnimationFrame(gameLoop);
 }
