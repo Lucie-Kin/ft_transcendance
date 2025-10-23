@@ -1,11 +1,11 @@
 import "../../style/home/homepage.css";
 import { Link } from "react-router-dom";
-import Login from '../login/Login'
+import Login from './login/Login'
 import { IoMailOutline } from "react-icons/io5";
 import { IoLockClosedOutline } from "react-icons/io5";
 
 
-export default function HomePage() {
+export default function loginPage() {
   return (
     <div> <h1>Transcendance</h1>
     <div className="container">

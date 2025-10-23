@@ -1,25 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Login.tsx                                          :+:      :+:    :+:   */
+/*   Button42.tsx                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/08 16:38:43 by mobonill          #+#    #+#             */
-/*   Updated: 2025/10/17 16:26:23 by morgane          ###   ########.fr       */
+/*   Created: 2025/09/08 16:28:09 by mobonill          #+#    #+#             */
+/*   Updated: 2025/10/23 16:28:16 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// import login from '../../style/login/login.css'
-import Button42 from './utils/Button42'
+import '../../../../style/login/button42.css'
+import logo42 from '../../../../assets/logo42.jpg'
 
-export default function Login() {
+export default function Button42() {
+	const handleClick = () => {
+		console.log("Je suis le bouton de 42")
+	}
 
 	return (
-		<div className="login">
-			<a href='/auth/42/login'>
-			<Button42/>
-			</a>
-		</div>
+		<button className="button42" onClick={handleClick}>
+			<img src={logo42} alt="logo" className='logo42' />
+			Continuez avec 42
+		</button>
 	)
 }

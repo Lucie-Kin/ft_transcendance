@@ -1,7 +1,6 @@
 ./server/services/auth/node_modules
 ./webapp/node_modules
 
-
 logs
 *.log
 npm-debug.log*
