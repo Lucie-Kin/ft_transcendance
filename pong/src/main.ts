@@ -27,6 +27,11 @@ function handleInput() {
 
 const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
+const scoreElement = document.getElementById('score')!;
+
+function updateScore() {
+	scoreElement.textContent = `${engine.scoreP1} | ${engine.scoreP2}`;
+}
 
 function render() {
 // efface l'écran
@@ -49,6 +54,7 @@ handleInput();
 engine.update();
 render();
 requestAnimationFrame(gameLoop);
+updateScore();
 }
 
 // démarre la boucle

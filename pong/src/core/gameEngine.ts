@@ -22,7 +22,10 @@ export class GameEngine {
 	resetBall() {
 		this.ball.x = this.field.width / 2;
 		this.ball.y = this.field.height / 2;
-		this.ball.speedX *= -1;
+		if ((this.scoreP1 + this.scoreP2) % 2 === 0)
+			this.ball.speedX = Math.abs(this.ball.speedX);
+		else
+			this.ball.speedX = -Math.abs(this.ball.speedX);
 	}
 
 	moveBall() {
@@ -32,7 +35,7 @@ export class GameEngine {
 		this.checkScore();
 
 		if (this.ball.y - this.ball.radius <= 0 || this.ball.y + this.ball.radius >= this.field.height) //changer la trajectoire apres collision
-		this.ball.speedY *= -1;
+			this.ball.speedY *= -1;
 	}
 
 	checkScore() {
