@@ -5,8 +5,8 @@ import { GameEngine } from './core/gameEngine.js';
 
 
 const field = new GameField(800, 600);
-const player1 = new Player(30, 300, 10);
-const player2 = new Player(750, 300, 10);
+const player1 = new Player(30, 250);
+const player2 = new Player(760, 250);
 const ball = new Ball(400, 300, 5, 5, 10);
 
 const engine = new GameEngine(player1, player2, ball, field);
@@ -19,10 +19,10 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('keyup', (e) => {pressedKeys.delete(e.key);});
 
 function handleInput() {
-	if (pressedKeys.has('ArrowUp')) engine.movePlayer(player1, 'up');
-	if (pressedKeys.has('w')) engine.movePlayer(player2, 'up');
-	if (pressedKeys.has('ArrowDown')) engine.movePlayer(player1, 'down');
-	if (pressedKeys.has('s')) engine.movePlayer(player2, 'down');
+	if (pressedKeys.has('ArrowUp')) engine.movePlayer(player2, 'up');
+	if (pressedKeys.has('w')) engine.movePlayer(player1, 'up');
+	if (pressedKeys.has('ArrowDown')) engine.movePlayer(player2, 'down');
+	if (pressedKeys.has('s')) engine.movePlayer(player1, 'down');
 }
 
 const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -49,12 +49,12 @@ ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
 ctx.fill();
 }
 
-function gameLoop() {
-handleInput();
-engine.update();
-render();
-requestAnimationFrame(gameLoop);
-updateScore();
+function gameLoop(): void {
+	handleInput();
+	engine.update();
+	render();
+	if (engine.scoreP1 === 5 || engine.scoreP2 === 5) return ;
+	requestAnimationFrame(gameLoop);
 }
 
 // démarre la boucle

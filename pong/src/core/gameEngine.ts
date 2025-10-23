@@ -31,9 +31,7 @@ export class GameEngine {
 	moveBall() {
 		this.ball.x += this.ball.speedX;
 		this.ball.y += this.ball.speedY;
-
 		this.checkScore();
-
 		if (this.ball.y - this.ball.radius <= 0 || this.ball.y + this.ball.radius >= this.field.height) //changer la trajectoire apres collision
 			this.ball.speedY *= -1;
 	}
