@@ -14,16 +14,32 @@ function generateState(): string {
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
-(fastify as any).register(fastifyMetrics, { endpoint: "/auth/metrics"});
+(fastify as any).register(fastifyMetrics, { endpoint: "/auth/metrics" });
 
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
 
-fastify.get("/auth", async () => {
+
+declare module "fastify" {
+  interface FastifyInstance {
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+}
+}
+
+
+fastify.decorate("authenticate", async function (request, reply) {
+	try {
+		await request.jwtVerify();
+	} catch (err) {
+		reply.code(401).send({ error: "Unauthorized, please authenticate." });
+	}
+});
+
+fastify.get("/auth", { preHandler: [fastify.authenticate] }, async () => {
 	return { message: "HELLO !!! /auth/42/login pour te connecter avec 42" };
 });
 
-const pendingStates = new Map<string, number>(); 
+const pendingStates = new Map<string, number>();
 
 
 fastify.get("/auth/42/login", async (_request: any, reply: any) => {
@@ -89,7 +105,7 @@ fastify.get("/auth/me", async (_request, reply) => {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
 	if (!res.ok)
-		return reply.code(res.status).send({Error: "Fetch failed line 93" });
+		return reply.code(res.status).send({ Error: "Fetch failed line 93" });
 	const user = await res.json();
 	const appToken = fastify.jwt.sign({
 		id: user.id,
