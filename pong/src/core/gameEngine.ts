@@ -1,6 +1,7 @@
 import { Ball } from './../entities/ball';
 import { Player } from './../entities/player';
 import { GameField } from './gameField';
+import { qLearning } from './qLearning';
 
 export class GameEngine {
 	constructor (
