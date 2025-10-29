@@ -1,4 +1,4 @@
-import "../../style/home/homepage.css";
+import "../../style/loginPage/loginpage.css";
 import { Link } from "react-router-dom";
 import { IoMailOutline } from "react-icons/io5";
 import { IoLockClosedOutline } from "react-icons/io5";
@@ -34,7 +34,8 @@ export default function inscriptionPage() {
               <label htmlFor="password"> Mot de passe</label>
             </div>
             <div className="login">
-            <br></br>
+            <button> S'inscrire </button>
+            <br></br> <br></br>
               <span>Déjà un compte ? </span>
                <Link to="/" className="switch-to-login">
                 Se connecter

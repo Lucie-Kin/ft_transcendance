@@ -1,4 +1,4 @@
-import "../../style/home/homepage.css";
+import "../../style/loginPage/loginpage.css";
 import { Link } from "react-router-dom";
 import Login from './login/Login'
 import { IoMailOutline } from "react-icons/io5";
