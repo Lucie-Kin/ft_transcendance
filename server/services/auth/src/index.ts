@@ -116,14 +116,10 @@ fastify.get("/auth/me", async (_request, reply) => {
 	reply.setCookie("appToken", appToken, {
 		httpOnly: true,
 		sameSite: "none",
-		secure: true
+		secure: true,
+		maxAge: 1 * 24 * 60 * 60,
 	});
-	return reply.send({
-		id: user.id,
-		login: user.login,
-		email: user.email,
-		image: user.image?.link,
-	});
+	return reply.redirect(`${process.env.FRONTEND_URL}/home`);
 });
 
 // fastify.get("/metrics", async (_req, reply) => {

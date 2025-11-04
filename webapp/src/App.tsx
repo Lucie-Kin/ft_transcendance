@@ -6,7 +6,7 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/08 16:28:16 by mobonill          #+#    #+#             */
-/*   Updated: 2025/10/28 15:36:15 by morgane          ###   ########.fr       */
+/*   Updated: 2025/11/04 13:35:33 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,11 @@ function App() {
     }
   }
 	return (
-		<Routes>
+		<Routes>h
 			<Route path="/" element={<LoginPage />} />
         	<Route path="/register" element={<Register />} />
-          <Route path="/home" element={isAuthenticated ? <HomePage />  : <Navigate to="/" replace />}
-      />
+          {/* <Route path="/home" element={isAuthenticated ? <HomePage />  : <Navigate to="/" replace />} */}
+          <Route path="/home" element={<HomePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
 		</Routes>
 	)
