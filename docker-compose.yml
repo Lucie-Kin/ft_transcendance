@@ -1,10 +1,28 @@
 services:
 
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: docker-proxy
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - SERVICES=1
+      - TASKS=1
+      - NETWORKS=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy_net
+
   traefik:
     image: traefik:v3.5
     container_name: traefik
+    restart: unless-stopped
+    depends_on:
+      - docker-proxy
     command:
-      - "--providers.docker=true"
+      - "--providers.docker=false" #repasser sur true si on enleve le docker proxy
+      - "--providers.docker.endpoint=http://docker-proxy:2375" #a enelever si pu le docker proxy
       - "--providers.docker.exposedbydefault=false"
       # entrypoints
       - "--entrypoints.web.address=:80"
@@ -28,6 +46,7 @@ services:
       - ./reverse-proxy/certs:/certs:ro
       - ./reverse-proxy/dynamics:/dynamics:ro
     networks:
+      - proxy_net
       - transcendance_net
 
 
@@ -127,5 +146,8 @@ volumes:
 
 
 networks:
+  proxy_net:
+    name: proxy_net
+    driver: bridge
   transcendance_net:
     driver: bridge

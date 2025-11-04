@@ -54,7 +54,7 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	pendingStates.set(state, Date.now() + 5 * 60 * 1000);
 
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
-		`&redirect_uri=${encodeURIComponent("https://localhost:8443/auth/callback")}` +
+		`&redirect_uri=${encodeURIComponent("https://localhost:5173/auth/callback")}` +
 		`&response_type=code` + `&state=${state}`;
 
 	return reply.redirect(url);

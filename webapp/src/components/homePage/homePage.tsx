@@ -31,18 +31,18 @@ export default function homePage() {
     window.location.href = '/';
   };
 
-  if (!user) {
-    return (
-      <div>
-        <h1>Accès refusé</h1>
-        <p>Veuillez vous <a href="/">connecter</a>.</p>
-      </div>
-    );
-  }
+//   if (!user) {
+//     return (
+//       <div>
+//         <h1>Accès refusé</h1>
+//         <p>Veuillez vous <a href="/">connecter</a>.</p>
+//       </div>
+//     );
+//   }
     return (
         <div> <h1>Transcendance Home Page</h1>
         <button onClick={logout}>Déconnexion</button>
-          <div>Bienvenue, {user.login}</div> 
+          {/* <div>Bienvenue, {user.login}</div>  */}
           </div>
     );
 }
