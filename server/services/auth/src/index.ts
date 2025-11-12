@@ -54,7 +54,7 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	pendingStates.set(state, Date.now() + 5 * 60 * 1000);
 
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
-		`&redirect_uri=${encodeURIComponent("https://localhost:5173/auth/callback")}` +
+		`&redirect_uri=${encodeURIComponent("https://localhost:8443/auth/callback")}` +
 		`&response_type=code` + `&state=${state}`;
 
 	return reply.redirect(url);
@@ -112,14 +112,16 @@ fastify.get("/auth/me", async (_request, reply) => {
 		login: user.login,
 		email: user.email,
 		image: user.image?.link,
-	});
-	reply.setCookie("appToken", appToken, {
-		httpOnly: true,
-		sameSite: "none",
-		secure: true,
-		maxAge: 1 * 24 * 60 * 60,
-	});
-	return reply.redirect(`${process.env.FRONTEND_URL}/home`);
+	  },
+	  { expiresIn: '1h' }
+	);
+	// reply.setCookie("appToken", appToken, {
+	// 	httpOnly: true,
+	// 	sameSite: "none",
+	// 	secure: true,
+	// 	maxAge: 1 * 24 * 60 * 60,
+	// });
+	return reply.redirect(`${process.env.FRONTEND_URL}/authenticated?token=${appToken}`);
 });
 
 // fastify.get("/metrics", async (_req, reply) => {
