@@ -4,6 +4,7 @@ import crypto from "crypto";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
 import fastifyMetrics from "fastify-metrics";
+import fastifyCors from '@fastify/cors';
 
 
 const fastify = Fastify({ logger: true });
@@ -11,6 +12,26 @@ const fastify = Fastify({ logger: true });
 function generateState(): string {
 	return crypto.randomBytes(16).toString("hex");
 }
+
+
+const ALLOWED_ORIGINS = new Set([
+	'http://localhost:5173',
+	'http://127.0.0.1:5173',
+]);
+
+await fastify.register(fastifyCors, {
+	origin: (origin, cb) => {
+		// Requêtes “non CORS” (curl local, healthchecks) → autoriser
+		if (!origin) return cb(null, true);
+		cb(null, ALLOWED_ORIGINS.has(origin));
+	},
+	credentials: true, // indispensable pour les cookies cross-site
+	methods: ['GET', 'POST', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	exposedHeaders: [],     // optionnel
+	maxAge: 86400,          // optionnel, cache du préflight
+});
+
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
@@ -21,9 +42,9 @@ let tokenExpiry: number | null = null;
 
 
 declare module "fastify" {
-  interface FastifyInstance {
-    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-}
+	interface FastifyInstance {
+		authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+	}
 }
 
 
@@ -112,17 +133,33 @@ fastify.get("/auth/me", async (_request, reply) => {
 		login: user.login,
 		email: user.email,
 		image: user.image?.link,
-	  },
-	  { expiresIn: '1h' }
+	},
+		{ expiresIn: '1h' }
 	);
-	// reply.setCookie("appToken", appToken, {
-	// 	httpOnly: true,
-	// 	sameSite: "none",
-	// 	secure: true,
-	// 	maxAge: 1 * 24 * 60 * 60,
-	// });
-	return reply.redirect(`${process.env.FRONTEND_URL}/authenticated?token=${appToken}`);
+	reply.setCookie('appToken', appToken, {
+		httpOnly: true,
+		secure: true,
+		sameSite: 'none',
+		path: '/',
+		maxAge: 60 * 60,
+	}).redirect(`${process.env.FRONTEND_URL}/authenticated`);
+
+
+	// return reply.redirect(`${process.env.FRONTEND_URL}/authenticated?token=${appToken}`);
 });
+
+fastify.post('/auth/logout', async (_req, reply) => {
+	reply
+		.clearCookie('appToken', {
+			httpOnly: true,
+			secure: true,
+			sameSite: 'none',
+			path: '/',
+		})
+		.code(204)
+		.send();
+});
+
 
 // fastify.get("/metrics", async (_req, reply) => {
 //   const metrics = `

@@ -1,0 +1,26 @@
+[0;1;31m×[0m docker.service - Docker Application Container Engine (Rootless)
+     Loaded: loaded (/home/mobonill/.config/systemd/user/docker.service; enabled; vendor preset: enabled)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Wed 2025-11-12 17:52:30 CET; 1min 36s ago
+       Docs: https://docs.docker.com/go/rootless/
+    Process: 85504 ExecStart=/usr/bin/dockerd-rootless.sh [0;1;31m(code=exited, status=1/FAILURE)[0m
+   Main PID: 85504 (code=exited, status=1/FAILURE)
+        CPU: 54ms
+
+Nov 12 17:52:30 c4r1p3.42nice.fr systemd[31750]: docker.service: Scheduled restart job, restart counter is at 3.
+Nov 12 17:52:30 c4r1p3.42nice.fr systemd[31750]: Stopped Docker Application Container Engine (Rootless).
+Nov 12 17:52:30 c4r1p3.42nice.fr systemd[31750]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Start request repeated too quickly.[0m
+Nov 12 17:52:30 c4r1p3.42nice.fr systemd[31750]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Failed with result 'exit-code'.[0m
+Nov 12 17:52:30 c4r1p3.42nice.fr systemd[31750]: [0;1;31m[0;1;39m[0;1;31mFailed to start Docker Application Container Engine (Rootless).[0m
+[0;1;31m×[0m docker.service - Docker Application Container Engine (Rootless)
+     Loaded: loaded (/home/mobonill/.config/systemd/user/docker.service; enabled; vendor preset: enabled)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Wed 2025-11-12 17:54:25 CET; 3s ago
+       Docs: https://docs.docker.com/go/rootless/
+    Process: 85971 ExecStart=/usr/bin/dockerd-rootless.sh [0;1;31m(code=exited, status=1/FAILURE)[0m
+   Main PID: 85971 (code=exited, status=1/FAILURE)
+        CPU: 54ms
+
+Nov 12 17:54:25 c4r1p3.42nice.fr systemd[31750]: docker.service: Scheduled restart job, restart counter is at 3.
+Nov 12 17:54:25 c4r1p3.42nice.fr systemd[31750]: Stopped Docker Application Container Engine (Rootless).
+Nov 12 17:54:25 c4r1p3.42nice.fr systemd[31750]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Start request repeated too quickly.[0m
+Nov 12 17:54:25 c4r1p3.42nice.fr systemd[31750]: [0;1;38;5;185m[0;1;39m[0;1;38;5;185mdocker.service: Failed with result 'exit-code'.[0m
+Nov 12 17:54:25 c4r1p3.42nice.fr systemd[31750]: [0;1;31m[0;1;39m[0;1;31mFailed to start Docker Application Container Engine (Rootless).[0m

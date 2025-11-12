@@ -37,7 +37,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<Register />} />
-        <Route path="/authenticated" element={<AuthCallback />} />
+      <Route path="/authenticated" element={<AuthCallback />} />
       <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/" replace />} />
       < Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

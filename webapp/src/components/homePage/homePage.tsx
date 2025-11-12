@@ -1,61 +1,47 @@
-import "../../style/homePage/homepage.css"
-import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from 'react';
 
-interface JwtPayload {
-  login: string;
-  email: string;
-  exp: number;
-  iat?: number;
-} // il faut def le type du JWT, sinon TS ne le reconnait pas et ne sait pas que login existe
+type User = { id: number; login: string; email: string; image?: string } | null;
 
+export default function HomePage() {
+  const [user, setUser] = useState<User>(null);
+  const [loading, setLoading] = useState(true);
 
-function isExpired(token: string): boolean {
-  try {
-    const { exp } = jwtDecode<JwtPayload>(token);
-    if (!exp)
-      return false;
-    return exp * 1000 < Date.now();
-  } catch {
-    return true;
-  }
-}
-
-export default function homePage() {
-
-  const token = localStorage.getItem("token");
-  let user: JwtPayload | null = null;
-
-  if (token) {
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-        throw new Error("expired");
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('https://localhost:8443/auth/session', {
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const { user } = await res.json();
+          setUser(user);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      user = decoded;
-    } catch (err) {
-      console.error("Token invalide/expiré:", err);
-      localStorage.removeItem("token");
-      window.location.href = "/";
-      return null;
-    }
-  }
+    })();
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/";
+  const logout = async () => {
+    await fetch('https://localhost:8443/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    window.location.href = '/';
   };
-  if (!user) {
-    return (
-      <div>
-        <h1>Accès refusé</h1>
-        <p>Veuillez vous <a href="/">connecter</a>.</p>
-      </div>
-    );
-  }
-    return (
-        <div> <h1>Transcendance Home Page</h1>
-        <button onClick={logout}>Déconnexion</button>
-          <div>Bienvenue, {user.login}</div> 
-          </div>
-    );
+
+  if (loading) return <div>Chargement…</div>;
+  if (!user) return <div>Accès refusé. <a href="/">Connecte-toi</a>.</div>;
+
+  return (
+    <div>
+      <h1>Transcendance Home Page</h1>
+      <button onClick={logout}>Déconnexion</button>
+      <div>Bienvenue, {user.login}</div>
+    </div>
+  );
 }
