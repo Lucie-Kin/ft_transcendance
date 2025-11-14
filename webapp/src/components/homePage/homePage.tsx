@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
+import "../../style/homePage/homepage.css"
 
-type User = { id: number; login: string; email: string; image?: string } | null;
+type User = {
+  id: number;
+  login: string;
+  email: string;
+  image?: string
+} | null;
 
 export default function HomePage() {
   const [user, setUser] = useState<User>(null);
@@ -12,12 +18,17 @@ export default function HomePage() {
         const res = await fetch('https://localhost:8443/auth/session', {
           credentials: 'include',
         });
+        const defaultAvatar = "../../../avatar.png";
+
         if (res.ok) {
           const { user } = await res.json();
+          if (!user.image)
+            user.image = defaultAvatar;
           setUser(user);
         } else {
           setUser(null);
         }
+
       } catch {
         setUser(null);
       } finally {
@@ -39,9 +50,25 @@ export default function HomePage() {
 
   return (
     <div>
-      <h1>Transcendance Home Page</h1>
-      <button onClick={logout}>Déconnexion</button>
-      <div>Bienvenue, {user.login}</div>
+      <div className="game">
+      </div> 
+      <div><h1>Transcendance Home Page</h1>
+        <h2> Bienvenue, {user.login}</h2>
+      </div>
+
+     
+
+      
+      <div className='settingsBox'>
+        <div className="avatar">
+          <img src={user.image} ></img>
+        </div>
+        <div className='login'>{user.login}</div>
+        <div><button className="logout" type="button" onClick={logout}>Déconnexion</button>
+      </div>
+      </div>
+
+
     </div>
   );
 }

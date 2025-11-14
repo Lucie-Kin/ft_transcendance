@@ -15,14 +15,11 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './components/loginPage/loginPage';
 import Register from './components/loginPage/register';
 import HomePage from './components/homePage/homePage';
-// import { jwtDecode } from "jwt-decode";
 
 
 
 export default function App() {
 
-  // const token = localStorage.getItem('token');
-  // const isAuthenticated = token && !isTokenExpired(token);
 
   return (
     <Routes>

@@ -132,7 +132,7 @@ fastify.get("/auth/me", async (_request, reply) => {
 			secure: true,
 			sameSite: 'none',
 			path: '/',
-			maxAge: 60 * 60,
+			maxAge: 60*60,
 		}).redirect(`${process.env.FRONTEND_URL}/home`);
 	}
 	catch(err) {
@@ -143,7 +143,7 @@ fastify.get("/auth/me", async (_request, reply) => {
 fastify.get("/auth/session", async (req, reply) => {
 	const token = (req.cookies as any)?.appToken;
 	if (!token)
-		return reply.code(401).send({ error: "no_cookie" });
+		return reply.code(401).send({ error: "no cookie" });
 	try {
 		const payload = await fastify.jwt.verify(token) as any;
 		return reply.send({ user: 
