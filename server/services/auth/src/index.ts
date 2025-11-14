@@ -3,75 +3,66 @@ import Fastify from "fastify";
 import crypto from "crypto";
 import fastifyCookie from "@fastify/cookie";
 import fastifyJwt from "@fastify/jwt";
-import fastifyMetrics from "fastify-metrics";
-import fastifyCors from '@fastify/cors';
+// import fastifyMetrics from "fastify-metrics";
+// import fastifyCors from '@fastify/cors';
 
 
 const fastify = Fastify({ logger: true });
 
-function generateState(): string {
-	return crypto.randomBytes(16).toString("hex");
-}
 
+// const ALLOWED_CORS = new Set([
+// 	'http://localhost:8443',
+// 	'http://127.0.0.1:8443',
+// ]);
 
-const ALLOWED_ORIGINS = new Set([
-	'http://localhost:5173',
-	'http://127.0.0.1:5173',
-]);
-
-await fastify.register(fastifyCors, {
-	origin: (origin, cb) => {
-		// Requêtes “non CORS” (curl local, healthchecks) → autoriser
-		if (!origin) return cb(null, true);
-		cb(null, ALLOWED_ORIGINS.has(origin));
-	},
-	credentials: true, // indispensable pour les cookies cross-site
-	methods: ['GET', 'POST', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization'],
-	exposedHeaders: [],     // optionnel
-	maxAge: 86400,          // optionnel, cache du préflight
-});
+// await fastify.register(fastifyCors, {
+// 	origin: (origin, cb) => {
+// 		if (!origin) return cb(null, true);
+// 		cb(null, ALLOWED_CORS.has(origin));
+// 	},
+// 	credentials: true,
+// 	methods: ['GET', 'POST', 'OPTIONS'],
+// 	allowedHeaders: ['Content-Type', 'Authorization'],
+// });
 
 
 fastify.register(fastifyCookie, { secret: process.env.COOKIE_SECRET! });
 fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
-(fastify as any).register(fastifyMetrics, { endpoint: "/auth/metrics" });
+// (fastify as any).register(fastifyMetrics, { endpoint: "/auth/metrics" });
 
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
 
 
-declare module "fastify" {
-	interface FastifyInstance {
-		authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-	}
+function generateState(): string {
+	return crypto.randomBytes(16).toString("hex");
 }
 
-
-fastify.decorate("authenticate", async function (request, reply) {
-	try {
-		await request.jwtVerify();
-	} catch (err) {
-		reply.code(401).send({ error: "Unauthorized, please authenticate." });
-	}
-});
-
-fastify.get("/auth", { preHandler: [fastify.authenticate] }, async () => {
-	return { message: "HELLO !!! /auth/42/login pour te connecter avec 42" };
-});
-
+// declare module "fastify" {
+	// 	interface FastifyInstance {
+		// 		authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+		// 	}
+		// }
+		
+		
+		// fastify.decorate("authenticate", async function (request, reply) {
+			// 	try {
+				// 		await request.jwtVerify();
+				// 	} catch (err) {
+					// 		reply.code(401).send({ error: "Unauthorized, please authenticate." });
+					// 	}
+					// });
+					
+					// // fastify.get("/auth", { preHandler: [fastify.authenticate] }, async () => {
+						// // 	return { message: "HELLO !!! /auth/42/login pour te connecter avec 42" };
+						// // });
+						
 const pendingStates = new Map<string, number>();
-
-
+						
+						
 fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 	const state = generateState();
 	console.log("LOGIN - Generated state:", state);
-	// reply.setCookie("oauth_cookie", state, {
-	// 	path: "/",
-	// 	httpOnly: true,
-	// 	sameSite: "none", // 'lax' ne fonctionne pas avec Firefox
-	// 	secure: true,
-	// });
 	pendingStates.set(state, Date.now() + 5 * 60 * 1000);
 
 	const url = `https://api.intra.42.fr/oauth/authorize` + `?client_id=${process.env.CLIENT_ID}` +
@@ -82,9 +73,9 @@ fastify.get("/auth/42/login", async (_request: any, reply: any) => {
 });
 
 fastify.get("/auth/callback", async (request: any, reply: any) => {
+
 	const code = request.query.code;
 	const state42 = request.query.state;
-	// const cookieState = request.cookies.oauth_cookie;
 
 	if (!code || !state42)
 		return reply.send({ Error: "No code sent" });
@@ -94,9 +85,6 @@ fastify.get("/auth/callback", async (request: any, reply: any) => {
 	}
 	pendingStates.delete(state42);
 
-	// if (cookieState !== state42) {
-	// 	return reply.code(400).send({ Error: "Wrong state received" });
-	// }
 	if (!accessToken || (tokenExpiry && Date.now() > tokenExpiry)) {
 		const res = await fetch(`https://api.intra.42.fr/oauth/token`, {
 			method: "POST",
@@ -119,57 +107,65 @@ fastify.get("/auth/callback", async (request: any, reply: any) => {
 });
 
 fastify.get("/auth/me", async (_request, reply) => {
-	if (!accessToken) {
-		return reply.code(401).send({ error: "not_authenticated" });
-	}
-	const res = await fetch("https://api.intra.42.fr/v2/me", {
-		headers: { Authorization: `Bearer ${accessToken}` },
-	});
-	if (!res.ok)
-		return reply.code(res.status).send({ Error: "Fetch failed line 93" });
-	const user = await res.json();
-	const appToken = fastify.jwt.sign({
-		id: user.id,
-		login: user.login,
-		email: user.email,
-		image: user.image?.link,
-	},
-		{ expiresIn: '1h' }
-	);
-	reply.setCookie('appToken', appToken, {
-		httpOnly: true,
-		secure: true,
-		sameSite: 'none',
-		path: '/',
-		maxAge: 60 * 60,
-	}).redirect(`${process.env.FRONTEND_URL}/authenticated`);
 
+	try {
+		if (!accessToken) {
+			return reply.code(401).send({ error: "not_authenticated" });
+		}
+		const res = await fetch("https://api.intra.42.fr/v2/me", {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		if (!res.ok)
+			return reply.code(res.status).send({ Error: "Fetch failed line 93" });
 
-	// return reply.redirect(`${process.env.FRONTEND_URL}/authenticated?token=${appToken}`);
-});
-
-fastify.post('/auth/logout', async (_req, reply) => {
-	reply
-		.clearCookie('appToken', {
+		const user = await res.json();
+		const appToken = fastify.jwt.sign({
+			id: user.id,
+			login: user.login,
+			email: user.email,
+			image: user.image?.link,
+		},
+			{ expiresIn: '1h' }
+		);
+		return reply.setCookie('appToken', appToken, {
 			httpOnly: true,
 			secure: true,
 			sameSite: 'none',
 			path: '/',
-		})
-		.code(204)
-		.send();
+			maxAge: 60 * 60,
+		}).redirect(`${process.env.FRONTEND_URL}/home`);
+	}
+	catch(err) {
+		return reply.code(401).send({err: "Can not create cookie"});
+	}
 });
 
+fastify.get("/auth/session", async (req, reply) => {
+	const token = (req.cookies as any)?.appToken;
+	if (!token)
+		return reply.code(401).send({ error: "no_cookie" });
+	try {
+		const payload = await fastify.jwt.verify(token) as any;
+		return reply.send({ user: 
+			{ 
+				id: payload.id,
+				login: payload.login,
+				email: payload.email, 
+				image: payload.image 
+			} });
+	} catch {
+		return reply.code(401).send({ error: "invalid_token" });
+	}
+});
 
-// fastify.get("/metrics", async (_req, reply) => {
-//   const metrics = `
-// 		# HELP http_requests_total Nombre total de requêtes HTTP
-// 		# TYPE http_requests_total counter
-// 		http_requests_total{method="GET",status="200"} 42
-// 		`;
-//   reply.header("Content-Type", "text/plain");
-//   return metrics;
-// });
+fastify.post('/auth/logout', async (_req, reply) => {
+	reply.clearCookie('appToken', {
+		httpOnly: true,
+		secure: true,
+		sameSite: 'none',
+		path: '/',
+	}).code(204).send();
+});
 
 
 await fastify.listen({ port: 3001, host: "0.0.0.0" });

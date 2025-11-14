@@ -15,30 +15,21 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './components/loginPage/loginPage';
 import Register from './components/loginPage/register';
 import HomePage from './components/homePage/homePage';
-import { jwtDecode } from "jwt-decode";
-import AuthCallback from './routes/Auth';
+// import { jwtDecode } from "jwt-decode";
 
 
-function isTokenExpired(token: string): boolean {
-  try {
-    const decoded: any = jwtDecode(token);
-    return decoded.exp * 1000 < Date.now();
-  } catch {
-    return true;
-  }
-}
 
 export default function App() {
 
-  const token = localStorage.getItem('token');
-  const isAuthenticated = token && !isTokenExpired(token);
+  // const token = localStorage.getItem('token');
+  // const isAuthenticated = token && !isTokenExpired(token);
 
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/authenticated" element={<AuthCallback />} />
-      <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/" replace />} />
+      <Route path="/home" element={<HomePage />} />
+      {/* <Route path="/home" element={isAuthenticated ? <HomePage /> : <Navigate to="/" replace />} /> */}
       < Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

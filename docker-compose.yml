@@ -98,13 +98,13 @@ services:
       - ./webapp:/webapp
     env_file:
       - ./.env
-    # labels:
-      # - "traefik.enable=true"
-      # - "traefik.http.routers.front.rule=Host(`localhost`) && PathPrefix(`/`)"
-      # - "traefik.http.routers.front.entrypoints=websecure"
-      # - "traefik.http.routers.front.tls=true"
-      # - "traefik.http.routers.front.priority=1"
-      # - "traefik.http.services.front.loadbalancer.server.port=5173"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`localhost`) && PathPrefix(`/`)"
+      - "traefik.http.routers.front.entrypoints=websecure"
+      - "traefik.http.routers.front.tls=true"
+      - "traefik.http.routers.front.priority=1"
+      - "traefik.http.services.front.loadbalancer.server.port=5173"
     command: sh -c "npm install && npm run dev"
     networks:
     - transcendance_net
