@@ -2,15 +2,11 @@ import { GameField } from './core/gameField.js';
 import { Player } from './entities/player.js';
 import { Ball } from './entities/ball.js';
 import { GameEngine } from './core/gameEngine.js';
-import { getState } from './core/qLearning.js';
-import { qLearning } from './core/qLearning.js';
-import { Action } from './core/qLearning.js'
 
 const field = new GameField(800, 600);
 const player1 = new Player(30, 250);
 const player2 = new Player(760, 250);
 const ball = new Ball(400, 300, 5, 5, 10);
-const ai = new qLearning();
 const engine = new GameEngine(player1, player2, ball, field);
 const pressedKeys = new Set<string>();
 let isPaused = false;
@@ -35,7 +31,7 @@ function handleInput() {
 const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
 const scoreElement = document.getElementById('score')!;
-const menuPause = document.getElementById('pause') as HTMLCanvasElement;
+const menuPause = document.getElementById('pause') as HTMLElement;
 function updateScore() {
 	scoreElement.textContent = `${engine.scoreP1} | ${engine.scoreP2}`;
 }
@@ -51,36 +47,25 @@ function render() {
 	ctx.fill();
 }
 
-let time = 0;
-let lastAction: Action = 'stay';
+let lastTimestamp = 0;
 
 function gameLoop(timestamp: number) {
+	const deltaTime = timestamp - lastTimestamp;
+	lastTimestamp = timestamp;
 	handleInput();
-	if (isPaused === false)
-		engine.update();
-	else
-		menuPause.textContent = `ON PAUSE`; //faire un vrai menu
-	render();
-	if (timestamp - time > 1000) {
-		const currentState = getState(ball, player2); // ton IA est player2
-		const qValues = ai.getQValues(currentState);
-		const action = ai.chooseAction(currentState);
-		lastAction = action;
-		console.log(`État: ${currentState}`);
-		console.log(`Q-values:`, Object.fromEntries(qValues));
-		console.log(`Action choisie: ${action}`);
-		console.log(`Taille QTable: ${ai['qTable'].size}`);
-		time = timestamp;
+	if (!isPaused) {
+		engine.update(deltaTime);
 	}
-	if (lastAction === 'up')
-		engine.movePlayer(player2, 'up');
-	if (lastAction === 'down')
-		engine.movePlayer(player2, 'down');
+	else {
+		menuPause.textContent = `ON PAUSE`;
+	}
+	render();
 	updateScore();
-	if (engine.scoreP1 === 5 || engine.scoreP2 === 5)
-		return ;
+	if (engine.scoreP1 === 5 || engine.scoreP2 === 5) {
+		console.log('🏆 Partie terminée!');
+		engine.AIController.save();
+		return;
+	}
 	requestAnimationFrame(gameLoop);
 }
-
 requestAnimationFrame(gameLoop);
-

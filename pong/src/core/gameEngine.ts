@@ -1,9 +1,13 @@
-import { Ball } from './../entities/ball';
-import { Player } from './../entities/player';
-import { GameField } from './gameField';
-import { qLearning } from './qLearning';
+import { Ball } from './../entities/ball.js';
+import { Player } from './../entities/player.js';
+import { GameField } from './gameField.js';
+import { qLearning } from './qLearning.js';
+import { AIController } from './AIController.js';
 
 export class GameEngine {
+	public AIController: AIController;
+	private autoSaveTimer: number = 0;
+	private autoSaveInterval: number = 30000;
 	constructor (
 		public player1: Player,
 		public player2: Player,
@@ -11,7 +15,9 @@ export class GameEngine {
 		public field: GameField,
 		public scoreP1: number = 0,
 		public scoreP2: number = 0,
-	) {}
+	) {
+		this.AIController = new AIController(player2, ball, field);
+	}
 
 	movePlayer(player: Player, direction: 'up' | 'down') {
 		if (direction === 'up')
@@ -24,7 +30,6 @@ export class GameEngine {
 		const angle = (Math.random() * Math.PI / 2) - (Math.PI / 4); // angle aléatoire entre -45° et +45° (en radians)
 		const speed = 5;
 		const direction = ((this.scoreP1 + this.scoreP2) % 2 === 0) ? 1 : -1; //envoie a gauche ou a droite
-
 		this.ball.x = this.field.width / 2;
 		this.ball.y = this.field.height / 2;
 		this.ball.speedX = Math.cos(angle) * speed * direction;
@@ -42,10 +47,12 @@ export class GameEngine {
 	private checkScore() {
 		if (this.ball.x + this.ball.radius >= this.field.width) {
 			this.scoreP1++;
+			this.AIController.onPointScored(false);
 			this.resetBall();
 		}
 		else if (this.ball.x - this.ball.radius <= 0) {
 			this.scoreP2++;
+			this.AIController.onPointScored(true);
 			this.resetBall();
 		}
 	}
@@ -80,8 +87,17 @@ export class GameEngine {
 		}
 	}
 
-	update() {
+	update(deltaTime: number = 16) {
 		this.moveBall();
 		this.checkCollisions();
+		const aiAction = this.AIController.update(deltaTime);
+		if (aiAction && aiAction !== 'stay') {
+			this.movePlayer(this.player2, aiAction);
+		}
+		this.autoSaveTimer += deltaTime;
+		if (this.autoSaveTimer >= this.autoSaveInterval) {
+			this.autoSaveTimer = 0;
+			this.AIController.save();
+		}
 	}
 }
