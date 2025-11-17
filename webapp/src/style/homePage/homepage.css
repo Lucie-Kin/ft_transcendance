@@ -7,7 +7,7 @@
 }
 
   
-  h1 {
+  /* h1 {
     color: white;
     font-size: 4rem;
     margin-top: -70rem;
@@ -23,10 +23,10 @@ h2 {
     justify-content: flex-start;
     align-items: start;
 
-}
+} */
 
 
-.logout {
+.logoutHome {
     position: fixed;
     top: 4rem;
     right: 0rem;
@@ -52,7 +52,7 @@ h2 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.avatar {
+.avatarHomePage {
     width: 140%;
     height: 140%;
     object-fit: cover;
@@ -60,7 +60,7 @@ h2 {
     display: block;
 }
 
-.login {
+.loginHomePage {
     position: fixed;
     top: 2rem;
     right: 5rem;
@@ -70,7 +70,7 @@ h2 {
     font-weight: bold;
 }
 
-.game {
+.gameBox {
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(12px);
     padding: 2rem;

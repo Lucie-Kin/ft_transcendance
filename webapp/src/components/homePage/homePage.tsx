@@ -50,7 +50,7 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="game">
+      <div className="gameBox">
       </div> 
       <div><h1>Transcendance Home Page</h1>
         <h2> Bienvenue, {user.login}</h2>
@@ -60,11 +60,11 @@ export default function HomePage() {
 
       
       <div className='settingsBox'>
-        <div className="avatar">
+        <div className="avatarHomePage">
           <img src={user.image} ></img>
         </div>
-        <div className='login'>{user.login}</div>
-        <div><button className="logout" type="button" onClick={logout}>Déconnexion</button>
+        <div className='loginHomePage'>{user.login}</div>
+        <div><button className="logoutHome" type="button" onClick={logout}>Déconnexion</button>
       </div>
       </div>
 

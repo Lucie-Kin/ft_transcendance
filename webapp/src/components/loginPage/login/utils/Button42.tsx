@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-import '../../../../style/login/button42.css'
+import '../../../../style/loginPage/login/button42.css'
 
 export default function Button42() {
 
