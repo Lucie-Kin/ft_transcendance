@@ -2,6 +2,8 @@ import { GameField } from './core/gameField.js';
 import { Player } from './entities/player.js';
 import { Ball } from './entities/ball.js';
 import { GameEngine } from './core/gameEngine.js';
+import { AIController } from './core/AIController.js';
+import { qLearning } from './core/qLearning.js';
 
 const field = new GameField(800, 600);
 const player1 = new Player(30, 250);
@@ -48,12 +50,18 @@ function render() {
 }
 
 let lastTimestamp = 0;
+const ai = new AIController(field);
+ai.load();
+ai.attach(player2, ball);
 
 function gameLoop(timestamp: number) {
 	const deltaTime = timestamp - lastTimestamp;
 	lastTimestamp = timestamp;
 	handleInput();
 	if (!isPaused) {
+		const action = ai.update(deltaTime);
+		if (action === 'up') engine.movePlayer(player2, 'up');
+		if (action === 'down') engine.movePlayer(player2, 'down');
 		engine.update(deltaTime);
 	}
 	else {
@@ -63,9 +71,48 @@ function gameLoop(timestamp: number) {
 	updateScore();
 	if (engine.scoreP1 === 5 || engine.scoreP2 === 5) {
 		console.log('🏆 Partie terminée!');
-		engine.AIController.save();
+		ai.save();
 		return;
 	}
 	requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
+
+
+//let i = 0;
+//function trainNextGame() {
+//    if (i >= 50000) {
+//        ai.save();
+//        console.log("🏁 Entraînement terminé !");
+//        return;
+//    }
+
+//    const engine = new GameEngine(
+//        new Player(30, 250),
+//        new Player(760, 250),
+//        new Ball(400, 300, 5, 5, 10),
+//        field,
+//        0,
+//        0,
+//        ai
+//    );
+
+//    engine.AIController.attach(engine.player2, engine.ball);
+
+//    while (engine.scoreP1 < 5 && engine.scoreP2 < 5) {
+//        engine.update(16);
+//    }
+
+//    if (i % 1000 === 0) {
+//        console.log(`Game ${i} finished`);
+//        ai.save();
+//    }
+
+//    i++;
+//    setTimeout(trainNextGame, 0); // laisse le navigateur respirer
+//}
+
+//trainNextGame();
+
+
+

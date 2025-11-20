@@ -4,19 +4,27 @@ import { GameField } from './gameField.js';
 import { qLearning, Action } from './qLearning.js';
 
 export class AIController {
+	public player!: Player;
+	public ball!: Ball;
+	public field: GameField;
+
 	private qLearning: qLearning;
 	private refreshTimer = 0;
-	private refreshRate = 0;
+	private refreshRate = 1000;
 	private lastState: string | null = null;
 	private lastAction: Action | null = null;
 	private currentAction: Action | null = null;
-	constructor(
-		private ai: Player,
-		private ball: Ball,
-		private field: GameField
-	) {
+	private pendingReward = 0;
+	constructor(field: GameField) {
+		this.field = field;
 		this.qLearning = new qLearning();
 		this.load();
+	}
+
+	// méthode pour connecter l’IA à un nouveau joueur + balle
+	attach(player: Player, ball: Ball) {
+		this.player = player;
+		this.ball = ball;
 	}
 
 	save() {
@@ -52,15 +60,51 @@ export class AIController {
 		}
 	}
 
+	predictBallPosition(ball: Ball, timeMs: number, field: GameField): Ball {
+		let x = ball.x;
+		let y = ball.y;
+		let vx = ball.speedX;
+		let vy = ball.speedY;
+
+		// nombre de pas de simulation (environ 16 ms par frame)
+		const steps = Math.ceil(timeMs / 16);
+
+		for (let i = 0; i < steps; i++) {
+			x += vx;
+			y += vy;
+
+			// rebond haut/bas
+			if (y < 0) {
+				y = -y;
+				vy = -vy;
+			}
+			if (y > field.height) {
+				y = 2 * field.height - y;
+				vy = -vy;
+			}
+
+			// optionnel : rebond gauche/droite si tu veux prédire aussi les scores
+			// if (x < 0) { x = -x; vx = -vx; }
+			// if (x > field.width) { x = 2*field.width - x; vx = -vx; }
+		}
+
+		return new Ball(x, y, vx, vy, ball.radius);
+	}
+
+
+
+
 	update(deltaTime: number): Action | null {
 		this.refreshTimer += deltaTime;
 		if (this.refreshTimer >= this.refreshRate) {
 			this.refreshTimer = 0;
-			const currentState = getState(this.ball, this.ai);
+			const predictedBall = this.predictBallPosition(this.ball, this.refreshRate, this.field);
+			const currentState = getState(predictedBall, this.player);
 			const action = this.qLearning.chooseAction(currentState);
 			console.log('State:', currentState, 'Action:', action);
 			if (this.lastState && this.lastAction) {
-				const reward = this.calculateRewards()
+				const reward = this.calculateRewards() + this.pendingReward;
+				this.pendingReward = 0;
 				this.qLearning.updateQValue(this.lastState, this.lastAction, reward, currentState);
 				console.log('Updated Q-value:', this.qLearning.getQValues(this.lastState).get(this.lastAction));
 			}
@@ -72,14 +116,25 @@ export class AIController {
 	}
 
 	private calculateRewards(): number {
-		const paddleCenter = this.ai.y + this.ai.height / 2;
+		let reward = 0;
+
+		// 1. Récompense de proximité
+		const paddleCenter = this.player.y + this.player.height / 2;
 		const distance = Math.abs(this.ball.y - paddleCenter);
 		const maxDistance = this.field.height / 2;
-		// Récompense inversement proportionnelle à la distance
-		const alignmentReward = 1 - (distance / maxDistance);
-		// Bonus si la balle vient vers l'IA
-		const approachBonus = this.ball.speedX > 0 ? 0.5 : 0;
-		return (alignmentReward * 0.1 + approachBonus * 0.1);
+		reward += (1 - distance / maxDistance) * 0.003;
+
+		// 2. Récompense pour bonne direction
+		if (this.currentAction === 'up' && this.ball.y < paddleCenter) reward += 0.01;
+		if (this.currentAction === 'down' && this.ball.y > paddleCenter) reward += 0.01;
+		if (this.currentAction === 'up' && this.ball.y > paddleCenter) reward -= 0.01;
+		if (this.currentAction === 'down' && this.ball.y < paddleCenter) reward -= 0.01;
+
+		return reward;
+	}
+
+	addReward(value: number) {
+		this.pendingReward += value;
 	}
 
 	onPointScored(aiWon: boolean) {

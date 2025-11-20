@@ -15,8 +15,10 @@ export class GameEngine {
 		public field: GameField,
 		public scoreP1: number = 0,
 		public scoreP2: number = 0,
+		AI?: AIController
 	) {
-		this.AIController = new AIController(player2, ball, field);
+		this.AIController = AI ?? new AIController(field);
+		this.AIController.attach(player2, ball);
 	}
 
 	movePlayer(player: Player, direction: 'up' | 'down') {
@@ -83,6 +85,7 @@ export class GameEngine {
 		}
 		if (ballRight >= this.player2.x && ballBottom >= this.player2.y && ballTop <= p2Bottom && this.ball.speedX > 0) {
 			this.calculateBounce(this.player2, -1);
+			this.AIController.addReward?.(1);
 			this.ball.x = this.player2.x - this.ball.radius; //a corriger
 		}
 	}
