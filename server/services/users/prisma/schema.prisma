@@ -8,6 +8,17 @@ generator client {
   binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
+enum PlayerLevel {
+  CHEESE_STICKS
+  CHEESE_ROLLS
+  BUFFALA_DELLA_NONNA
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
 
 model User {
   id         String   @id @default(cuid())
@@ -18,5 +29,38 @@ model User {
   avatarUrl  String?
   createdAt  DateTime @default(now())
 
+  stats                   PlayerStats?
+  sentFriendRequests      Friendship[] @relation("FriendRequestsSent")
+  receivedFriendRequests  Friendship[] @relation("FriendRequestsReceived")
+
   @@index([provider, providerId])
+}
+
+model PlayerStats {
+  id                String        @id @default(cuid())
+  userId            String        @unique
+  user              User          @relation(fields:[userId], references:[id])
+  PlayerLevel       PlayerLevel   @default(CHEESE_STICKS)
+  eloRating         Int           @default(1000)
+  matchesPlayed     Int           @default(0)
+  wins              Int           @default(0)
+  losses            Int           @default(0)
+  cumulativePoints  Int           @default(0)
+  lastActiveAt      DateTime      @default(now())
+  createdAt         DateTime      @default(now())
+  updateAt          DateTime      @updateAt
+}
+
+model Friendship {
+  id               String         @id @default(cuid())
+  requestedId      String
+  addresseeId      String
+  requester        User           @relation("FriendRequestsSent", fields: [requesterId], references:[id])
+  addressee        User           @relation("FriendRequestsReceived", fields: [addresseeId], references: [id])
+  status           FriendshipStatus @default(PENDING)
+  createdAt        DateTime      @default(now())
+  updateAt         DateTime      @updateAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId])
 }
